@@ -1196,6 +1196,8 @@ impl<'a> WebViewBuilder<'a> {
   /// - **Windows:** This will disable the HTML Drag and Drop APIs like `draggable="true"`,
   ///   since we replace the drag drop handler of WebView 2 on Windows.
   ///   `handler`'s return value is ignored on Windows.
+  ///   A drag of text with no files emits the events with no paths; read the text with
+  ///   `take_dropped_text` when it drops.
   /// - **Android / iOS:** Unsupported.
   pub fn with_drag_drop_handler<F>(mut self, handler: F) -> Self
   where
@@ -2319,6 +2321,22 @@ pub enum DragDropEvent {
 #[cfg_attr(docsrs, doc(cfg(feature = "os-webview")))]
 pub fn webview_version() -> Result<String> {
   platform_webview_version()
+}
+
+/// Takes the text of the last drop that carried text and no files.
+///
+/// Such a drag emits [`DragDropEvent::Enter`], [`DragDropEvent::Over`] and [`DragDropEvent::Drop`]
+/// with no paths. Call this when the [`DragDropEvent::Drop`] arrives. The text is returned once,
+/// and the next drag clears it. Only plain text is read; text over 4 MiB or that is not valid
+/// UTF-16 is refused.
+///
+/// ## Platform-specific:
+///
+/// - **Windows only:** the drag drop handler replaces WebView2's own drop target, so the page
+///   never sees the drop. See [`WebViewBuilder::with_drag_drop_handler`].
+#[cfg(target_os = "windows")]
+pub fn take_dropped_text() -> Option<String> {
+  webview2::take_dropped_text()
 }
 
 /// The [memory usage target level][1]. There are two levels 'Low' and 'Normal' and the default

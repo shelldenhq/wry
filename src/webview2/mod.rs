@@ -32,6 +32,7 @@ use windows::{
 };
 
 use self::drag_drop::DragDropController;
+pub(crate) use self::drag_drop::take_dropped_text;
 use super::Theme;
 use crate::{
   Error, MemoryUsageLevel, NewWindowFeatures, NewWindowOpener, NewWindowResponse, PageLoadEvent,
